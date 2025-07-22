@@ -117,6 +117,8 @@ touch .gitignore
 git rm -r --cached data/
 # Commit the change
 git commit -m "Remove data folder from tracking per .gitignore"
+
+python src/analyzers.py
 ```
 
 &nbsp; 
