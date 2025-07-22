@@ -109,6 +109,18 @@ git push origin main
 - Sharing with the Panel
     - Push your branch to GitHub: git push origin feature/analysis-X.
     - At discussion time, share the GitHub link to your notebook so the panel can view the commit history, code annotations, and outputs live.
+    
+- create the file if it doesn't exist
+```bash
+touch .gitignore
+# Remove data/ from the index (but leave the files on disk)
+git rm -r --cached data/
+# Commit the change
+git commit -m "Remove data folder from tracking per .gitignore"
+
+python src/analyzers.py
+```
+
 &nbsp; 
 
 <a name="summ"></a>
