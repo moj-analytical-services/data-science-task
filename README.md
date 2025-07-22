@@ -89,13 +89,26 @@ pip install -r requirements.txt
 - review: open a PR against main when ready.
 
 ```bash
-
 git add .
 git commit -m "EDA: initial missing-value summary"
 git push origin main
-
 ```
 
+- Version Control Workflow
+
+    - Branching: Create a feature branch, e.g. feature/LY-analysis-01.
+
+    - Commits: After each major step—EDA, modeling, evaluation—commit with a clear message:
+    ```bash
+    git add notebooks/01_analysis_template.ipynb src/data_processing.py
+    git commit -m "EDA: added missing-value visualization"
+    ```
+
+    - Pull Request: When complete, open a PR against main and tag reviewers.
+
+- Sharing with the Panel
+    - Push your branch to GitHub: git push origin feature/analysis-X.
+    - At discussion time, share the GitHub link to your notebook so the panel can view the commit history, code annotations, and outputs live.
 &nbsp; 
 
 <a name="summ"></a>
