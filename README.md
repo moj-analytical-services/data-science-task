@@ -60,6 +60,12 @@ project-name/
 ├── src/                     # Python modules and scripts
 │   ├── __init__.py          # marks this folder as a package
 │   └── data_processing.py   # reusable data-loading and cleaning functions
+│   └── data_quality.py      # Data Quality Checks class
+├── tests/                   # Automated unit testing
+│   └── test_data_quality.py # pytest tests for Data Quality
+├─ .github/
+│   └─ workflows/
+│       └─ ci.yml 
 ├── .gitignore               # Configure to exclude from Git /data/, environment folders, caches, and any large files.
 ├── README.md                # project overview and setup instructions
 └── requirements.txt         # pinned Python dependencies / freezed library versions to ensure consistent environments across machines.
@@ -73,8 +79,29 @@ python3 -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
 
+
+```
+## Run tests locally
+```bash
+# Discover & run all tests in tests/
+pytest --maxfail=1 --disable-warnings -q
+
+```
+or from Jupyter lab notebook: 
+```python
+!pytest -q
 ```
 
+# Automate via CI (GitHub Actions)
+Create a file .github/workflows/ci.yml:
+
+# Discover & run all tests in tests/
+pytest --maxfail=1 --disable-warnings -q
+-q gives you a concise report.
+
+On success you’ll see something like === 10 passed in 0.5s ===.
+
+On failure you’ll get full assertion tracebacks
 ## Workflow
 
 - data: place raw files in data/raw/.
@@ -95,17 +122,18 @@ git push origin main
 ```
 
 - Version Control Workflow
-
     - Branching: Create a feature branch, e.g. feature/LY-analysis-01.
-
     - Commits: After each major step—EDA, modeling, evaluation—commit with a clear message:
     ```bash
     git add notebooks/01_analysis_template.ipynb src/data_processing.py
     git commit -m "EDA: added missing-value visualization"
     ```
-
     - Pull Request: When complete, open a PR against main and tag reviewers.
 
+    - commit code + tests + requirements.
+    
+    - **CI**: add GitHub Actions workflow to enforce tests on every push.
+    - Verify on GitHub: Navigate to the Actions tab of your repository on GitHub. You should see the “CI” workflow queued or running.
 - Sharing with the Panel
     - Push your branch to GitHub: git push origin feature/analysis-X.
     - At discussion time, share the GitHub link to your notebook so the panel can view the commit history, code annotations, and outputs live.
