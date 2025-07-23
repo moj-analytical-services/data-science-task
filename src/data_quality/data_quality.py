@@ -82,7 +82,18 @@ class DataQualityChecks:
 
     def compute_delay(self, start_col: str, end_col: str, drop_neg: bool=True) -> pd.DataFrame:
         """
-        Compute delay in days, assign NaN for invalid ones, optionally drop negatives.
+        Compute the number of days between two date columns, 
+        assign NaN for invalid ones, optionally drop negatives.
+
+        For each row:
+          1. Subtract registration (start_col) from receipt (end_col).
+          2. Assign negative or invalid results to NaN.
+          3. Optionally drop those rows if drop_neg=True.
+
+        :param start_col: name of the registration-date column
+        :param end_col:   name of the receipt-date column
+        :param drop_neg:  whether to drop rows with negative delays
+        :returns:         the DataFrame with a new 'delay_days' column
         """
         # Calculate raw delta in days
         self.df['delay_days'] = (
@@ -99,7 +110,7 @@ class DataQualityChecks:
                 self.df['delay_days'].notna() & (self.df['delay_days'] >= 0)
             ].copy()
         return self.df
-
+    
     def impute_delays(self, date_col: str='registrationdate') -> pd.DataFrame:
         """
         Fill missing delays with group-year mean, fallback to overall mean.

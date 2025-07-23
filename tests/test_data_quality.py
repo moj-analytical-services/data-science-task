@@ -5,7 +5,7 @@ import pandas as pd
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import calendar
-from data_quality import DataQualityChecks
+from .src.data_quality.data_quality import DataQualityChecks
 
 @pytest.fixture
 def sample_df(tmp_path):
