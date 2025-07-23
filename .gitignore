@@ -8,6 +8,8 @@ env/
 
 # Jupyter checkpoints
 .ipynb_checkpoints/
+notebooks/.ipynb_checkpoints/
+src/.ipynb_checkpoints/
 
 # Data files (raw & processed; keep these out of Git)
 data/

@@ -1,7 +1,11 @@
 # Unit tests using pytest (tests/test_data_quality.py)
 # ------------------------------------
 import pytest
-from data_quality import DataQualityChecks
+import pandas as pd
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import calendar
+from .src.data_quality.data_quality import DataQualityChecks
 
 @pytest.fixture
 def sample_df(tmp_path):
@@ -83,3 +87,55 @@ def test_last_day_of_month():
     assert DataQualityChecks.last_day_of_month(datetime(2021,2,15)) == '2021-02-28'
     assert DataQualityChecks.last_day_of_month(datetime(2020,2,10)) == '2020-02-29'
     assert DataQualityChecks.last_day_of_month(datetime(2021,4,5)) == '2021-04-30'
+
+# Additional cross-column and consistency tests
+
+def test_flag_invalid_delays(sample_df):
+    # Should flag rows where registrationdate is NaT or after receipt
+    dq = DataQualityChecks(sample_df)
+    dq.validate_dates(['registrationdate','date_received_in_opg'])
+    mask = dq.flag_invalid_delays('registrationdate','date_received_in_opg')
+    # One row has invalid registrationdate parsing → True
+    assert mask.sum() == 1
+    # Ensure flagged row corresponds to sample index 2
+    assert mask.iloc[2]
+
+
+def test_derive_keys_unique(sample_df):
+    # Ensure derived_id column is created and unique
+    dq = DataQualityChecks(sample_df)
+    dq.validate_dates(['registrationdate','date_received_in_opg'])
+    df2 = dq.derive_keys(('case_no','unique_id'))
+    assert 'derived_id' in df2.columns
+    # No duplicates in derived_id
+    assert df2['derived_id'].is_unique
+
+
+def test_remove_duplicates_keeps_first(sample_df):
+    # Simulate duplicates
+    dq = DataQualityChecks(sample_df)
+    dq.validate_dates(['registrationdate','date_received_in_opg'])
+    dq.compute_delay('registrationdate','date_received_in_opg')
+    dq.derive_keys(('case_no','unique_id'))
+    df_dup = pd.concat([dq.df, dq.df.iloc[[0]]], ignore_index=True)
+    dq.df = df_dup
+    before = dq.df.shape[0]
+    after = dq.remove_duplicates().shape[0]
+    assert after == before - 1
+
+
+def test_summary_statistics_contains_expected():
+    dq = DataQualityChecks(sample_df)
+    desc = dq.summary_statistics()
+    # summary should include delay_days if computed later, but at least include registrationdate col
+    assert 'registrationdate' in desc.columns
+    assert 'date_received_in_opg' in desc.columns
+
+
+def test_registration_before_receipt_consistency(sample_df):
+    # After validation, registrationdate should be <= receipt date or NaT
+    dq = DataQualityChecks(sample_df)
+    df2 = dq.validate_dates(['registrationdate','date_received_in_opg'])
+    # All non-null registrations are <= receipt
+    valid = df2[df2['registrationdate'].notna()]
+    assert (valid['registrationdate'] <= valid['date_received_in_opg']).all()
